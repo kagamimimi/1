@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-Tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For pst</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --bg-pan-duration: 24s; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            color: #fff; /* make all text white by default */
+        }
+        h1 {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 2.2em;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .flow-section {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 48px 20px 20px 20px;
+            /* full-bleed look when using image backgrounds */
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            margin: 0;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .flow-section.active {
+            display: flex;
+            animation: fadeIn 0.7s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .flow-section p {
+            font-size: 1.3em;
+            color: #fff;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        /* large, decorative title for first page */
+        .flow-title {
+            font-size: 2.4em;
+            font-weight: 700;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+        @media (max-width: 500px) {
+            .flow-title { font-size: 1.6em; letter-spacing: 2px; }
+        }
+
+        /* fade-up text animation for each line (slower) */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(18px);
+            animation: fadeUp 2600ms forwards cubic-bezier(0.2,0.8,0.2,1);
+        }
+    /* increased spacing between lines */
+    .fade-up.delay-1 { animation-delay: 600ms; }
+    .fade-up.delay-2 { animation-delay: 1400ms; }
+    .fade-up.delay-3 { animation-delay: 2200ms; }
+    .fade-up.delay-4 { animation-delay: 3000ms; }
+    .fade-up.delay-5 { animation-delay: 3800ms; }
+    .fade-up.delay-6 { animation-delay: 4600ms; }
+    .fade-up.delay-7 { animation-delay: 5400ms; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .flow-btn {
+            width: 64px;
+            height: 64px;
+            padding: 0;
+            font-size: 1.1em;
+            border-radius: 50%;
+            background: transparent; /* transparent style */
+            color: rgba(255,255,255,0.95);
+            border: 1px solid rgba(255,255,255,0.22);
+            box-shadow: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s, border-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) translateY(18px);
+            bottom: 18px;
+            opacity: 0; /* default hidden, will enter via JS */
+        }
+        .flow-btn svg {
+            width: 22px;
+            height: 22px;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .flow-btn:active {
+            background: rgba(255,255,255,0.04);
+            transform: translateX(-50%) scale(0.97);
+        }
+        .flow-btn:hover {
+            border-color: rgba(255,255,255,0.36);
+            transform: translateX(-50%) translateY(-4px);
+        }
+        @keyframes floatBtn {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-6px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+        .flow-btn[disabled] {
+            border-color: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+            cursor: not-allowed;
+            opacity: 0.8;
+            animation: none; /* stop floating when disabled */
+        }
+
+        @keyframes btnEnter {
+            from { opacity: 0; transform: translateX(-50%) translateY(22px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* visually-hidden but accessible text for screen readers */
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        img {
+            max-width: 90%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px 0 rgba(59,130,246,0.13);
+            margin-bottom: 18px;
+        }
+
+        /* Per-page background helpers (use images from images/ folder) */
+        .flow-section.bg-1 {
+            background-image: linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.18)), url('images/1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff; /* make text light on images */
+        }
+        /* Make the FLOW title on the first page larger and underlined */
+        .flow-section.bg-1 .flow-title {
+            font-size: 2.4em; /* half of 4.8em */
+            text-decoration: underline;
+            text-decoration-color: rgba(255,255,255,0.95);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 6px;
+            font-weight: 400; /* remove heavy bold */
+        }
+        .flow-section.bg-2 {
+            background-image: linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url('images/2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+        .flow-section.bg-3 {
+            background-image: linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url('images/3.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+        .flow-section.bg-4 {
+            background-image: linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22)), url('images/4.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+        .flow-section.bg-5 {
+            background-image: linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22)), url('images/5.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+        .flow-section.bg-6 {
+            /* Time Counter: use image 7 as background */
+            background-image: linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22)), url('images/7.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+            align-items: stretch; /* allow children to span width */
+            justify-content: space-between; /* top content and bottom counters separated */
+            padding-top: 6vh; /* title slightly down from very top */
+            padding-bottom: 6vh; /* leave space at bottom */
+            --tc-title-size: 4.0em; /* title size variable available to children */
+        }
+
+        /* Time Counter specific styles */
+        .flow-section.bg-6 .tc-title {
+            width: 100%;
+            text-align: left;
+            margin: 6px 20px;
+            font-size: var(--tc-title-size); /* larger title */
+            line-height: 1.02;
+            font-weight: 700;
+            color: #fff;
+        }
+        .flow-section.bg-6 .tc-top { padding: 2vh 0 0 0; margin-top: calc(2 * var(--tc-title-size)); }
+        .flow-section.bg-6 p { text-align: left; width: 100%; margin: 6px 20px; }
+        .flow-section.bg-6 .small { font-size: 0.9em; }
+        /* make 2nd and 4th line half size */
+    .flow-section.bg-6 .tc-small { font-size: 0.65em; }
+    /* counters container sits in the lower half */
+    .flow-section.bg-6 .counters { margin: 0 0 6vh 0; display: flex; flex-direction: column; gap: 8px; padding: 0 20px; }
+        /* separator line between the two counters */
+        .flow-section.bg-6 .tc-sep { width: calc(100% - 40px); height: 1px; background: rgba(255,255,255,0.12); border: none; margin: 12px 20px; }
+        /* right-align the time values for first and third lines */
+    .flow-section.bg-6 .time-row { display: flex; justify-content: space-between; align-items: center; }
+    .flow-section.bg-6 .time-row .label { text-align: left; flex: 1 1 auto; margin-right: 12px; }
+    .flow-section.bg-6 .time-row .value { text-align: right; flex: 0 0 auto; min-width: 160px; }
+        .flow-section.bg-7 {
+            /* About page: use image 8 */
+            background-image: linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22)), url('images/8.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+        .flow-section.bg-8 {
+            /* 想说的话 page: use image 6 */
+            background-image: linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22)), url('images/6.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+
+        /* background pan animation: slowly move background left-right to reveal full image */
+        @keyframes bgPan {
+            0% { background-position: 20% center; }
+            50% { background-position: 80% center; }
+            100% { background-position: 20% center; }
+        }
+
+        /* apply panning to pages that use images (bg-1..bg-8) */
+        .flow-section.bg-1,
+        .flow-section.bg-2,
+        .flow-section.bg-3,
+        .flow-section.bg-4,
+        .flow-section.bg-5,
+        .flow-section.bg-6,
+        .flow-section.bg-7,
+        .flow-section.bg-8 {
+            animation: bgPan var(--bg-pan-duration) ease-in-out infinite;
+        }
+
+        /* navigation buttons on the 5th page */
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 6px;
+        }
+        .flow-section.bg-5 .nav-title {
+            font-size: 1.6em;
+            font-weight: 600;
+            text-align: left;
+            margin: 12px 0 6px 18px;
+            color: #fff;
+        }
+        /* separator between title and buttons */
+        .flow-section.bg-5 .nav-sep {
+            width: 80%;
+            height: 1px;
+            background: rgba(255,255,255,0.12);
+            border: none;
+            margin: 10px auto 18px auto;
+        }
+        /* ensure nav buttons sit a bit lower but remain centered */
+        .flow-section.bg-5 .nav-buttons {
+            margin-top: 8px;
+        }
+        .nav-btn {
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.18s, border-color 0.18s, background 0.18s;
+        }
+        .nav-btn:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.36); background: rgba(255,255,255,0.04); }
+        .back-arrow {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(0,0,0,0.12);
+            color: #fff;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.18s, transform 0.12s;
+        }
+        .back-arrow:hover { background: rgba(0,0,0,0.22); transform: translateY(-2px); }
+        .back-arrow:focus {
+            outline: 2px solid rgba(255,255,255,0.18);
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+        }
+        .nav-btn:focus {
+            outline: 2px solid rgba(255,255,255,0.12);
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.08);
+        }
+        .page-footer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.85);
+            pointer-events: none;
+        }
+        .page-footer p { margin: 2px 0; }
+        @media (max-width: 500px) {
+            .flow-section {
+                max-width: 98vw;
+                padding: 18px 4vw 18px 4vw;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+            .flow-btn {
+                width: 56px;
+                height: 56px;
+            }
+            .flow-btn {
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- removed top title for full-screen layout -->
+    <main>
+        <section class="flow-section active bg-1">
+            <p class="fade-up delay-1 flow-title">FLOW</p>
+            <p class="fade-up delay-2">我有很多话想对你说</p>
+            <button class="flow-btn" aria-label="下一页">
+                <span class="sr-only">下一页</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                </svg>
+            </button>
+        </section>
+
+        <section class="flow-section bg-2">
+            <p class="fade-up delay-1">确实</p>
+                <p class="fade-up delay-2">我不知道如何更好地表达自己</p>
+            <button class="flow-btn" aria-label="下一页">
+                <span class="sr-only">下一页</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                </svg>
+            </button>
+        </section>
+
+        <section class="flow-section bg-3">
+            <p class="fade-up delay-1">回忆不断浮现</p>
+            <p class="fade-up delay-2">过去只是未来的羁绊</p>
+            <p class="fade-up delay-3"> </p>
+            <p class="fade-up delay-4">我希望</p>
+            <button class="flow-btn" aria-label="下一页">
+                <span class="sr-only">下一页</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                </svg>
+            </button>
+        </section>
+
+        <section class="flow-section bg-4">
+            <p class="fade-up delay-1">希望你的22岁</p>
+            <p class="fade-up delay-2">平安顺遂 幸福常随</p>
+            <p class="fade-up delay-3"> </p>
+            <p class="fade-up delay-4">你的开心</p>
+            <p class="fade-up delay-5">比对错更重要</p>
+            <button class="flow-btn" aria-label="结束">
+                <span class="sr-only">结束</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                </svg>
+            </button>
+        </section>
+    </main>
+    
+        <!-- Page 5: navigation shortcuts (heading removed) -->
+        <section class="flow-section bg-5">
+            <div class="nav-title">Happy Birthday</div>
+            <div class="nav-title">A small gift for you</div>
+            <hr class="nav-sep" />
+            <div class="nav-buttons">
+                <button class="nav-btn fade-up delay-1" id="nav-flow">FLOW</button>
+                <button class="nav-btn fade-up delay-2" id="nav-say">想说的话</button>
+                <button class="nav-btn fade-up delay-3" id="nav-time">Time Counter</button>
+                <button class="nav-btn fade-up delay-4" id="nav-about">关于这个网页</button>
+            </div>
+            <footer class="page-footer">
+                <p>A Gift For The 22th Birthday of pst</p>
+                <p>Coding By yhy</p>
+            </footer>
+        </section>
+
+        <!-- Page 6: Time Counter -->
+            <section class="flow-section bg-6">
+                <button class="back-arrow" id="back-time" aria-label="返回更多选项">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="tc-top">
+                    <!-- Title lines -->
+                    <p class="fade-up delay-1 tc-title">The</p>
+                    <p class="fade-up delay-2 tc-title">Timecounter</p>
+                </div>
+
+                <div class="counters">
+                    <!-- First counter (left aligned labels, value right aligned) -->
+                    <div class="fade-up delay-3 time-row">
+                        <span class="label">距离我们相遇已有</span>
+                        <span class="value"><span id="since-meeting-val">0天 0时 0分 0秒</span></span>
+                    </div>
+                    <p class="fade-up delay-4 tc-small">自 2024年8月26日</p>
+
+                    <!-- separator between counters -->
+                    <hr class="tc-sep fade-up delay-5" />
+
+                    <!-- Second counter -->
+                    <div class="fade-up delay-6 time-row">
+                        <span class="label">距离潘思彤来到这个世界已有</span>
+                        <span class="value"><span id="since-pst-val">0天 0时 0分 0秒</span></span>
+                    </div>
+                    <p class="fade-up delay-7 tc-small">自 2003年11月6日</p>
+                </div>
+            </section>
+    <!-- Page 7: About -->
+        <section class="flow-section bg-7">
+            <button class="back-arrow" id="back-about" aria-label="返回更多选项">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <p class="fade-up delay-1">从我开始定下这个礼物到学习html/css和js再到它的实现，花费了我大概三周的时间，因为有些设计的难度比我想象的要大的多，所以最后的成果难免有些出入，有些地方是我借助了AI才得以实现，它可能看起来比较简陋，但确实注入了我非常多的精力，如果你喜欢这份礼物的话，我会非常开心。</p>
+        </section>
+
+        <!-- Page 8: 想说的话 (new independent page) -->
+        <section class="flow-section bg-8">
+            <button class="back-arrow" id="back-say" aria-label="返回更多选项">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <p class="fade-up delay-1">确实，我不知道如何更好地表达自己</p>
+        </section>
+
+    <script>
+        // Background music player
+        (function(){
+            const audio = document.createElement('audio');
+            audio.id = 'bg-music';
+            // Encode path to support spaces and non-ASCII characters
+            audio.src = encodeURI('MP3/坂部剛 - Milk.mp3');
+            audio.loop = true;
+            audio.preload = 'auto';
+            // Only set crossOrigin when served over http(s)
+            if (location.protocol.startsWith('http')) {
+                audio.crossOrigin = 'anonymous';
+            }
+            audio.style.display = 'none';
+            document.body.appendChild(audio);
+            audio.autoplay = true;
+            audio.setAttribute('autoplay', '');
+            audio.setAttribute('playsinline', '');
+            audio.setAttribute('webkit-playsinline', '');
+            audio.setAttribute('x5-playsinline', '');
+            audio.muted = true;
+            audio.volume = 0.65;
+            // diagnostics: log and show notice on failure
+            function showBgmNotice(msg) {
+                console.warn('BGM NOTICE:', msg);
+                let el = document.getElementById('bgm-notice');
+                if (!el) {
+                    el = document.createElement('div');
+                    el.id = 'bgm-notice';
+                    el.style.position = 'fixed';
+                    el.style.left = '12px';
+                    el.style.top = '12px';
+                    el.style.zIndex = '99999';
+                    el.style.background = 'rgba(0,0,0,0.6)';
+                    el.style.color = '#fff';
+                    el.style.padding = '8px 12px';
+                    el.style.borderRadius = '6px';
+                    el.style.fontSize = '13px';
+                    el.style.maxWidth = '60vw';
+                    document.body.appendChild(el);
+                }
+                el.textContent = msg;
+            }
+
+            audio.addEventListener('play', () => console.log('BGM: playing'));
+            audio.addEventListener('pause', () => console.log('BGM: paused'));
+            audio.addEventListener('error', (e) => {
+                console.error('BGM error', e);
+                showBgmNotice('背景音乐加载失败，检查 MP3 路径或文件名编码');
+            });
+
+            // quick fetch to detect 404 / path issues (useful for local files)
+            try {
+                fetch(audio.src, { method: 'HEAD' }).then(resp => {
+                    if (!resp.ok) {
+                        showBgmNotice('无法访问 BGM 文件 (HTTP ' + resp.status + ')：' + audio.src);
+                    } else {
+                        console.log('BGM file reachable:', audio.src);
+                    }
+                }).catch(err => {
+                    console.warn('BGM fetch failed:', err);
+                    // still attempt to play; show hint
+                    showBgmNotice('尝试访问 BGM 文件时发生错误，查看控制台获取更多信息');
+                });
+            } catch (e) {
+                console.warn('BGM fetch not available', e);
+            }
+            audio.load();
+
+            // attempt to autoplay: try normal play; if blocked, play muted and unmute on first user interaction
+            // retry autoplay with intervals (useful for delayed autoplay policies or slow loads)
+            let autoplayRetries = 0;
+            let autoplayTimer = null;
+            function tryAutoplay() {
+                audio.play().then(() => {
+                    console.log('BGM: autoplay succeeded');
+                    if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
+                    autoplayRetries = 0;
+                }).catch(() => {
+                    // autoplay blocked or failed: try muted play and schedule retries
+                    try {
+                        if (!audio.muted) audio.muted = true;
+                        audio.play().catch(()=>{});
+                    } catch(e){}
+
+                    if (!autoplayTimer) {
+                        autoplayTimer = setInterval(() => {
+                            autoplayRetries++;
+                            console.log('BGM: autoplay retry', autoplayRetries);
+                            audio.play().then(() => {
+                                console.log('BGM: retry succeeded');
+                                if (audio.muted) audio.muted = false;
+                                clearInterval(autoplayTimer);
+                                autoplayTimer = null;
+                            }).catch(() => {
+                                if (autoplayRetries >= 12) { // stop after ~12s
+                                    clearInterval(autoplayTimer);
+                                    autoplayTimer = null;
+                                    console.warn('BGM: autoplay retries exhausted');
+                                }
+                            });
+                        }, 1000);
+                    }
+                    // also set up single-interaction unblockers
+                    const unblock = () => {
+                        audio.muted = false;
+                        audio.play().catch(()=>{});
+                        document.removeEventListener('click', unblock);
+                        document.removeEventListener('keydown', unblock);
+                    };
+                    document.addEventListener('click', unblock, { once: true });
+                    document.addEventListener('keydown', unblock, { once: true });
+                });
+            }
+            // try immediately (script is at end of body) and also on DOMContentLoaded just in case
+            tryAutoplay();
+            document.addEventListener('DOMContentLoaded', tryAutoplay);
+
+            // If autoplay fallback left audio muted, also try unmuting and playing on common interactions
+            function hideBgmNotice() {
+                const el = document.getElementById('bgm-notice');
+                if (el && el.parentNode) el.parentNode.removeChild(el);
+            }
+
+            function tryUnmuteAndPlay() {
+                try {
+                    if (audio.muted) audio.muted = false;
+                    audio.play().then(() => {
+                        console.log('BGM: resumed on interaction');
+                        hideBgmNotice();
+                    }).catch(err => console.warn('BGM resume failed:', err));
+                } catch (e) {
+                    console.warn('BGM tryUnmuteAndPlay error', e);
+                }
+            }
+
+            // common interaction events
+            document.addEventListener('click', tryUnmuteAndPlay, { passive: true });
+            document.addEventListener('touchstart', tryUnmuteAndPlay, { passive: true });
+            document.addEventListener('keydown', tryUnmuteAndPlay, { passive: true });
+            // try to resume when window regains focus
+            window.addEventListener('focus', tryUnmuteAndPlay);
+
+            audio.addEventListener('play', hideBgmNotice);
+        })();
+        const sections = Array.from(document.querySelectorAll('.flow-section'));
+        const nextButtons = Array.from(document.querySelectorAll('.flow-btn'));
+    let current = 0;
+    let timerInterval = null; // retained for compatibility but not used for counters
+
+        function showSection(index) {
+            sections.forEach((s, i) => s.classList.toggle('active', i === index));
+            current = index;
+            // if going to time counter page (bg-6), start the time counters; otherwise stop them
+            if (sections[index].classList.contains('bg-6')) {
+                startTimeCounters();
+            } else {
+                stopTimeCounters();
+            }
+            // replay any fade-up animations when showing a section
+            replayFadeUps(sections[index]);
+        }
+
+        function replayFadeUps(section) {
+            const lines = section.querySelectorAll('.fade-up');
+            lines.forEach(el => {
+                el.style.animation = 'none';
+                // force reflow
+                void el.offsetWidth;
+                el.style.animation = '';
+            });
+            // trigger button entrance and then floating animation, but only after fade-up lines finish
+            const btn = section.querySelector('.flow-btn');
+            if (btn) {
+                // Entrance only: fade in once, do not float or disappear automatically
+                btn.style.animation = 'none';
+                btn.style.opacity = '0';
+                void btn.offsetWidth;
+                // play entrance after content fades complete, but cap delay
+                const linesArr = Array.from(section.querySelectorAll('.fade-up'));
+                const fadeDur = 2600;
+                let maxDelay = 0;
+                linesArr.forEach(el => {
+                    const style = getComputedStyle(el);
+                    const ad = style.animationDelay || '0ms';
+                    let ms = 0;
+                    if (ad.indexOf('ms') > -1) ms = parseFloat(ad.replace('ms',''));
+                    else if (ad.indexOf('s') > -1) ms = parseFloat(ad.replace('s','')) * 1000;
+                    maxDelay = Math.max(maxDelay, ms + fadeDur);
+                });
+                const entranceDelay = Math.max(0, maxDelay);
+                setTimeout(() => {
+                    btn.style.animation = 'btnEnter 1200ms forwards cubic-bezier(0.2,0.8,0.2,1)';
+                }, entranceDelay);
+            }
+        }
+
+        function goTo(index) {
+            if (index >= 0 && index < sections.length) showSection(index);
+        }
+
+        // helper: convert ms difference to days, hours, minutes, seconds
+        function durationToParts(ms) {
+            const totalSec = Math.floor(ms / 1000);
+            const days = Math.floor(totalSec / 86400);
+            let rem = totalSec % 86400;
+            const hours = Math.floor(rem / 3600); rem = rem % 3600;
+            const minutes = Math.floor(rem / 60);
+            const seconds = rem % 60;
+            return { days, hours, minutes, seconds };
+        }
+
+        // new counters for Time Counter page
+        let countersInterval = null;
+        function startTimeCounters() {
+            stopTimeCounters();
+            const meetDate = new Date('2024-08-26T00:00:00');
+            const pstDate = new Date('2003-11-06T00:00:00');
+            const meetEl = document.getElementById('since-meeting-val');
+            const pstEl = document.getElementById('since-pst-val');
+            function tick() {
+                const now = new Date();
+                const d1 = durationToParts(now - meetDate);
+                const d2 = durationToParts(now - pstDate);
+                if (meetEl) meetEl.textContent = `${d1.days}天 ${d1.hours}时 ${d1.minutes}分 ${d1.seconds}秒`;
+                if (pstEl) pstEl.textContent = `${d2.days}天 ${d2.hours}时 ${d2.minutes}分 ${d2.seconds}秒`;
+            }
+            tick();
+            countersInterval = setInterval(tick, 1000);
+        }
+
+        function stopTimeCounters() {
+            if (countersInterval) { clearInterval(countersInterval); countersInterval = null; }
+        }
+
+        // hook up the existing next buttons (they advance in order)
+        nextButtons.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                if (current < sections.length - 1) {
+                    goTo(current + 1);
+                }
+                // always keep arrows visible; do not disable on last page
+            });
+        });
+
+        // page 5 nav buttons (use class-based lookup to avoid hardcoded indices)
+        const navFlow = document.getElementById('nav-flow');
+        const navSay = document.getElementById('nav-say');
+        const navTime = document.getElementById('nav-time');
+        const navAbout = document.getElementById('nav-about');
+
+        function getIndexByBg(bgClass) {
+            return sections.findIndex(s => s.classList.contains(bgClass));
+        }
+
+    if (navFlow) navFlow.addEventListener('click', () => { const idx = getIndexByBg('bg-1'); if (idx>-1) { goTo(idx); replayFadeUps(sections[idx]); }});
+    if (navSay) navSay.addEventListener('click', () => { const idx = getIndexByBg('bg-8'); if (idx>-1) { goTo(idx); replayFadeUps(sections[idx]); }});
+    if (navTime) navTime.addEventListener('click', () => { const idx = getIndexByBg('bg-6'); if (idx>-1) { goTo(idx); replayFadeUps(sections[idx]); }});
+    if (navAbout) navAbout.addEventListener('click', () => { const idx = getIndexByBg('bg-7'); if (idx>-1) { goTo(idx); replayFadeUps(sections[idx]); }});
+
+        // back arrows (return to page 5 - find index of bg-5)
+        const back2 = document.getElementById('back-2');
+        const backTime = document.getElementById('back-time');
+        const backAbout = document.getElementById('back-about');
+        const backSay = document.getElementById('back-say');
+        const idxBg5 = getIndexByBg('bg-5');
+        if (back2 && idxBg5>-1) back2.addEventListener('click', () => goTo(idxBg5));
+        if (backTime && idxBg5>-1) backTime.addEventListener('click', () => goTo(idxBg5));
+        if (backAbout && idxBg5>-1) backAbout.addEventListener('click', () => goTo(idxBg5));
+        if (backSay && idxBg5>-1) backSay.addEventListener('click', () => goTo(idxBg5));
+
+        // compute per-section background pan durations so absolute pixel speed matches bg-3
+        function adjustBgDurations() {
+            const rootStyle = getComputedStyle(document.documentElement);
+            const defaultDur = (rootStyle.getPropertyValue('--bg-pan-duration') || '24s').trim();
+            const defaultSec = parseFloat(defaultDur.replace(/s$/, '')) || 24;
+
+            // collect sections with background-image url
+            const items = [];
+            sections.forEach(sec => {
+                const cs = getComputedStyle(sec);
+                const bg = cs.backgroundImage || '';
+                const m = bg.match(/url\((?:"|'|)(.*?)(?:"|'|)\)/);
+                if (m && m[1]) items.push({ sec, url: m[1] });
+            });
+
+            // load all images
+            const loadImage = (url) => new Promise((res, rej) => {
+                const img = new Image();
+                img.onload = () => res({ w: img.naturalWidth, h: img.naturalHeight });
+                img.onerror = () => rej(new Error('image load error'));
+                img.src = url;
+            });
+
+            const promises = items.map(it => loadImage(it.url).then(dim => ({ ...it, dim })).catch(() => ({ ...it, dim: null })));
+
+            Promise.all(promises).then(results => {
+                // compute movement pixels for each
+                const computeMovement = ({ sec, dim }) => {
+                    const rect = sec.getBoundingClientRect();
+                    if (!dim) return 0;
+                    const nw = dim.w, nh = dim.h;
+                    const cw = rect.width, ch = rect.height;
+                    // cover scale
+                    const scale = Math.max(cw / nw, ch / nh);
+                    const renderedW = nw * scale;
+                    const extra = Math.max(0, renderedW - cw);
+                    // bgPan moves from 20% to 80% -> 60% of extra width
+                    return extra * 0.6;
+                };
+
+                const mapped = results.map(r => ({ sec: r.sec, url: r.url, dim: r.dim, movement: computeMovement(r) }));
+
+                const ref = mapped.find(m => m.sec.classList.contains('bg-3'));
+                if (!ref || !ref.dim || ref.movement <= 0) {
+                    // can't compute reference; leave default durations
+                    mapped.forEach(m => {
+                        m.sec.style.animationDuration = defaultSec + 's';
+                    });
+                    return;
+                }
+
+                const refSpeed = ref.movement / defaultSec; // px per second we want
+
+                mapped.forEach(m => {
+                    if (!m.dim || m.movement <= 0) {
+                        m.sec.style.animationDuration = defaultSec + 's';
+                        return;
+                    }
+                    let dur = m.movement / refSpeed; // seconds
+                    // clamp to sensible bounds
+                    if (!isFinite(dur) || dur < 6) dur = 6;
+                    if (dur > 120) dur = 120;
+                    m.sec.style.animationDuration = dur + 's';
+                });
+            }).catch(() => {
+                // on error, leave default
+                sections.forEach(s => s.style.animationDuration = defaultSec + 's');
+            });
+        }
+
+        // on load, ensure first section is active and its fades play; then adjust bg speeds
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection(0);
+            adjustBgDurations();
+        });
+    </script>
+</body>
+</html>
