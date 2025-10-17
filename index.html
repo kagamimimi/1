@@ -72,13 +72,15 @@
             animation: fadeUp 2600ms forwards cubic-bezier(0.2,0.8,0.2,1);
         }
     /* increased spacing between lines */
-    .fade-up.delay-1 { animation-delay: 600ms; }
-    .fade-up.delay-2 { animation-delay: 1400ms; }
-    .fade-up.delay-3 { animation-delay: 2200ms; }
-    .fade-up.delay-4 { animation-delay: 3000ms; }
-    .fade-up.delay-5 { animation-delay: 3800ms; }
-    .fade-up.delay-6 { animation-delay: 4600ms; }
-    .fade-up.delay-7 { animation-delay: 5400ms; }
+    .fade-up.delay-1 { animation-delay: 800ms; }
+    .fade-up.delay-2 { animation-delay: 1600ms; }
+    .fade-up.delay-3 { animation-delay: 2400ms; }
+    .fade-up.delay-4 { animation-delay: 3200ms; }
+    .fade-up.delay-5 { animation-delay: 4000ms; }
+    .fade-up.delay-6 { animation-delay: 4800ms; }
+    .fade-up.delay-7 { animation-delay: 5600ms; }
+    .fade-up.delay-8 { animation-delay: 6400ms; }
+    .fade-up.delay-9 { animation-delay: 7200ms; }
 
         @keyframes fadeUp {
             to { opacity: 1; transform: translateY(0); }
@@ -232,6 +234,7 @@
         .flow-section.bg-6 .tc-top { padding: 2vh 0 0 0; margin-top: calc(2 * var(--tc-title-size)); }
         .flow-section.bg-6 p { text-align: left; width: 100%; margin: 6px 20px; }
         .flow-section.bg-6 .small { font-size: 0.9em; }
+        .flow-section.bg-6 .tc-mid { font-size: 0.8em; }
         /* make 2nd and 4th line half size */
     .flow-section.bg-6 .tc-small { font-size: 0.65em; }
     /* counters container sits in the lower half */
@@ -380,7 +383,9 @@
     <main>
         <section class="flow-section active bg-1">
             <p class="fade-up delay-1 flow-title">FLOW</p>
-            <p class="fade-up delay-2">我有很多话想对你说</p>
+            <p class="fade-up delay-2">送给潘思彤的22岁</p>
+            <p class="fade-up delay-3"> </p>
+            <p class="fade-up delay-4">我有很多话想对你说</p>
             <button class="flow-btn" aria-label="下一页">
                 <span class="sr-only">下一页</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -391,7 +396,7 @@
 
         <section class="flow-section bg-2">
             <p class="fade-up delay-1">确实</p>
-                <p class="fade-up delay-2">我不知道如何更好地表达自己</p>
+            <p class="fade-up delay-2">我不知道如何更好地表达自己</p>
             <button class="flow-btn" aria-label="下一页">
                 <span class="sr-only">下一页</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -431,7 +436,7 @@
         <!-- Page 5: navigation shortcuts (heading removed) -->
         <section class="flow-section bg-5">
             <div class="nav-title">Happy Birthday</div>
-            <div class="nav-title">A small gift for you</div>
+            <div class="nav-title">A Small Gift For You</div>
             <hr class="nav-sep" />
             <div class="nav-buttons">
                 <button class="nav-btn fade-up delay-1" id="nav-flow">FLOW</button>
@@ -473,6 +478,8 @@
                         <span class="value"><span id="since-pst-val">0天 0时 0分 0秒</span></span>
                     </div>
                     <p class="fade-up delay-7 tc-small">自 2003年11月6日</p>
+                    <hr class="tc-sep fade-up delay-8" />
+                    <p class="fade-up delay-9 tc-mid">这一切还会继续</p>
                 </div>
             </section>
     <!-- Page 7: About -->
@@ -480,7 +487,7 @@
             <button class="back-arrow" id="back-about" aria-label="返回更多选项">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <p class="fade-up delay-1">从我开始定下这个礼物到学习html/css和js再到它的实现，花费了我大概三周的时间，因为有些设计的难度比我想象的要大的多，所以最后的成果难免有些出入，有些地方是我借助了AI才得以实现，它可能看起来比较简陋，但确实注入了我非常多的精力，如果你喜欢这份礼物的话，我会非常开心。</p>
+            <p class="fade-up delay-1">这份礼物，从我开始学习html/css和js到代码的完成再到这个网页的实现，大概经历了两周多的时间，因为有些设计的难度比我想象的要大的多，所以最后的成果难免有些出入，有些地方是我借助了AI才得以实现，它可能看起来比较简陋，但确实注入了我非常多的精力，如果你喜欢这份礼物的话，我会非常开心。</p>
         </section>
 
         <!-- Page 8: 想说的话 (new independent page) -->
@@ -488,7 +495,7 @@
             <button class="back-arrow" id="back-say" aria-label="返回更多选项">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <p class="fade-up delay-1">确实，我不知道如何更好地表达自己</p>
+            <p class="fade-up delay-1">生日快乐呀，一转眼我们认识已经一年多了，这一年我们之间经历了许多，希望你在你的世界里活得越来越逍遥舒心，永远有选择可做，永远有余地可退，永远做真实的自己，</p>
         </section>
 
     <script>
